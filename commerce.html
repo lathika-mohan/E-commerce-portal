@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Efficient E-Commerce Portal - Assignment 3</title>
+    <style>
+        /* CSS Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        header {
+            background-color: #2874f0; /* Flipkart/Amazon Blue */
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+            transition: background-color 0.3s;
+        }
+
+        nav ul li a:hover {
+            background-color: #1e63d6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #2874f0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        button {
+            background-color: #ff9900; /* Amazon Orange/Yellow */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #cc7a00;
+        }
+
+        /* Product Grid */
+        #product-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .product-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* === IMAGE SIZING CHANGE HERE === */
+        .product-card img {
+            width: 200px; /* Fixed Width */
+            height: 200px; /* Fixed Height for Uniform Grid Layout */
+            max-width: 100%; /* Ensures it scales down if container is too small */
+            border-radius: 4px;
+            margin-bottom: 10px;
+            /* Ensures the entire image fits within the 200x200 box without cropping */
+            object-fit: contain; 
+        }
+        /* ================================ */
+
+        .product-card h4 {
+            margin: 10px 0 5px 0;
+            color: #2874f0;
+        }
+
+        .product-card p {
+            font-weight: bold;
+            color: #b12704;
+        }
+
+        /* Side Bar / Dashboard Features */
+        .dashboard-feature {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 5px solid #2874f0;
+            border-radius: 4px;
+        }
+
+        .dashboard-feature h4 {
+            margin-top: 0;
+            color: #2874f0;
+        }
+
+        /* Copyright Footer */
+        footer {
+            text-align: center;
+            padding: 15px;
+            background-color: #333;
+            color: #ccc;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Efficient E-Commerce Portal 🛒</h1>
+        <nav>
+            <ul>
+                <li><a href="#home" onclick="showSection('home')">Home</a></li>
+                <li><a href="#products" onclick="showSection('products')">Product Items</a></li>
+                <li><a href="#contact" onclick="showSection('contact')">Contact Us</a></li>
+                <li><a href="#about" onclick="showSection('about')">About Us</a></li>
+                <li><a href="#auth" onclick="showSection('auth')">Login/Register</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <section id="home" class="content-section active">
+            <h2>Welcome to the Efficient E-Commerce Portal!</h2>
+            <p>Your one-stop shop for all things great. Navigate using the menu above.</p>
+            <div id="product-items-preview">
+                <h3>Featured Products (Simulated Async Load)</h3>
+                <div id="product-items" class="loading-state">Loading products...</div>
+            </div>
+        </section>
+
+        <section id="products" class="content-section" style="display:none;">
+            <h2>Product Items 📦</h2>
+            <div id="all-product-items">
+                </div>
+        </section>
+
+        <section id="auth" class="content-section" style="display:none;">
+            <h2>User Authentication</h2>
+            
+            <div style="float: left; width: 45%; margin-right: 10%;">
+                <h3>Register</h3>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="reg-email">Email:</label>
+                        <input type="email" id="reg-email" required>
+                        <div id="reg-email-error" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password">Password:</label>
+                        <input type="password" id="reg-password" required minlength="6">
+                        <div id="reg-password-error" class="error-message"></div>
+                    </div>
+                    <button type="submit">Register</button>
+                    <p id="reg-message" style="margin-top: 10px; font-weight: bold;"></p>
+                </form>
+            </div>
+
+            <div style="float: left; width: 45%;">
+                <h3>Login</h3>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Email:</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password:</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit">Login</button>
+                    <p id="login-message" style="margin-top: 10px; font-weight: bold;"></p>
+                </form>
+            </div>
+            <div style="clear: both;"></div>
+
+        </section>
+
+        <section id="contact" class="content-section" style="display:none;">
+            <h2>Contact Us 📞</h2>
+            <p>Email us at: support@ecommerce.com</p>
+            <p>Call us at: +91 98765 43210</p>
+        </section>
+
+        <section id="about" class="content-section" style="display:none;">
+            <h2>About Us ℹ️</h2>
+            <p>We are committed to delivering the best products at the best prices, powered by **Asynchronous JavaScript**!</p>
+        </section>
+
+        <aside style="margin-top: 30px;">
+            <h2>Customer Dashboard Features ⚙️</h2>
+            <div style="display: flex; gap: 20px;">
+                <div class="dashboard-feature" style="flex: 1;">
+                    <h4>📦 Orders List (JS Callback Example)</h4>
+                    <p>Fetching your recent orders...</p>
+                    <ul id="orders-list">
+                        <li>Order #A101 - Delivered</li>
+                        <li>Order #B202 - Processing</li>
+                    </ul>
+                </div>
+
+                <div class="dashboard-feature" style="flex: 1;">
+                    <h4>❤️ Wishlist</h4>
+                    <ul id="wishlist-items">
+                        <li>Gaming Mouse</li>
+                        <li>4K Monitor</li>
+                        <li>Mechanical Keyboard</li>
+                    </ul>
+                </div>
+
+                <div class="dashboard-feature" style="flex: 1;">
+                    <h4>💬 Customer Care & Reporting</h4>
+                    <p>Report an issue or leave a review:</p>
+                    <button onclick="console.log('Reporting issue...'); alert('Issue reported! Our team will contact you shortly.');">Report Issue</button>
+                    <p>Reviews: 4.5/5 stars (Based on 120 reviews)</p>
+                </div>
+            </div>
+        </aside>
+
+    </div> <footer>
+        &copy; 2023 Efficient E-Commerce Portal | All Rights Reserved. | Images are for demonstration purposes.
+    </footer>
+
+    <script>
+        // --- ASYNCHRONOUS JAVASCRIPT LOGIC ---
+
+        // Mock Product Data with NEW IMAGE URLs
+        const MOCK_PRODUCTS = [
+            { 
+                id: 1, 
+                name: 'Wireless Headphones', 
+                price: 1999, 
+                image: 'https://m.media-amazon.com/images/I/61qdD0zSk8L._AC_UL480_FMwebp_QL65_.jpg' 
+            },
+            { 
+                id: 2, 
+                name: 'Smart Watch X', 
+                price: 4500, 
+                image: 'https://m.media-amazon.com/images/I/71Ar4cKZKYL._AC._SR360,460.jpg' 
+            },
+            { 
+                id: 3, 
+                name: 'Portable Charger', 
+                price: 799, 
+                image: 'https://ambraneindia.com/cdn/shop/files/heroshot_2_jpg.webp?v=1757570871&width=300' 
+            },
+            // The placeholder image is also constrained to 200x200 by the CSS.
+            { id: 4, name: 'LED Desk Lamp', price: 1250, image: 'https://via.placeholder.com/200x200?text=Desk+Lamp' },
+        ];
+        
+        // --- 1. JS PROMISES & ASYNC/AWAIT (Simulating API Call) ---
+
+        /**
+         * Simulates fetching product data from a backend API using a Promise.
+         * @returns {Promise<Array>} A promise that resolves with the list of products.
+         */
+        const fetchProducts = () => {
+            return new Promise((resolve, reject) => {
+                // Simulate network delay of 2 seconds
+                setTimeout(() => {
+                    console.log("Async: Products successfully fetched.");
+                    resolve(MOCK_PRODUCTS);
+                }, 2000); 
+            });
+        };
+
+        /**
+         * Renders the product cards onto the page.
+         * @param {Array} products - The array of product objects.
+         * @param {string} containerId - The ID of the HTML container element.
+         */
+        const renderProducts = (products, containerId) => {
+            const container = document.getElementById(containerId);
+            container.innerHTML = ''; // Clear loading message
+
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}">
+                    <h4>${product.name}</h4>
+                    <p>₹${product.price}</p>
+                    <button>Add to Cart</button>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        // Function to call the async data fetching and rendering
+        async function loadAllProducts() {
+            try {
+                // Using 'await' to pause execution until the Promise resolves
+                const products = await fetchProducts(); 
+                
+                // Render products in the 'Home' preview section
+                renderProducts(products.slice(0, 3), 'product-items'); 
+
+                // Render products in the 'Product Items' full section
+                renderProducts(products, 'all-product-items'); 
+
+            } catch (error) {
+                console.error("Error loading products:", error);
+                document.getElementById('product-items').innerHTML = '<p class="error-message">Failed to load products. Please try again.</p>';
+            }
+        }
+
+        // --- 2. JS CALLBACKS (Example for Orders) ---
+        /**
+         * Simulates fetching order data using a callback.
+         * @param {function} callback - The function to call once data is ready.
+         */
+        function fetchOrders(callback) {
+            console.log("JS Callback: Starting order fetch...");
+            // Simulate network delay
+            setTimeout(() => {
+                const orders = [
+                    'Order #C303 - Shipped',
+                    'Order #D404 - Delivered'
+                ];
+                callback(orders); // Execute the callback with the data
+            }, 1000);
+        }
+
+        /**
+         * Updates the Orders List using the data from the callback.
+         * @param {Array} newOrders - The new list of orders.
+         */
+        function updateOrdersList(newOrders) {
+            const list = document.getElementById('orders-list');
+            list.innerHTML = ''; // Clear initial static list
+            newOrders.forEach(order => {
+                const listItem = document.createElement('li');
+                listItem.textContent = order;
+                list.appendChild(listItem);
+            });
+            console.log("JS Callback: Orders list updated.");
+        }
+
+
+        // --- 3. INPUT FIELD VALIDATION (User Registration) ---
+
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const emailField = document.getElementById('reg-email');
+            const passwordField = document.getElementById('reg-password');
+            const emailError = document.getElementById('reg-email-error');
+            const passwordError = document.getElementById('reg-password-error');
+            const regMessage = document.getElementById('reg-message');
+
+            let isValid = true;
+            emailError.textContent = '';
+            passwordError.textContent = '';
+            regMessage.textContent = '';
+
+            // Email Validation
+            if (!emailField.value.includes('@') || !emailField.value.includes('.')) {
+                emailError.textContent = 'Please enter a valid email address.';
+                isValid = false;
+            }
+
+            // Password Validation (Minimum Length)
+            if (passwordField.value.length < 6) {
+                passwordError.textContent = 'Password must be at least 6 characters long.';
+                isValid = false;
+            }
+
+            if (isValid) {
+                // Simulate asynchronous registration process
+                regMessage.style.color = 'orange';
+                regMessage.textContent = 'Registering user...';
+                
+                // Using a Promise-like delay for simulation
+                setTimeout(() => {
+                    regMessage.style.color = 'green';
+                    regMessage.textContent = `Success! User ${emailField.value} registered.`;
+                    emailField.value = '';
+                    passwordField.value = '';
+                }, 1500);
+            }
+        });
+
+        // --- 4. LOGIN SIMULATION ---
+
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const loginEmail = document.getElementById('login-email').value;
+            const loginPassword = document.getElementById('login-password').value;
+            const loginMessage = document.getElementById('login-message');
+
+            loginMessage.style.color = 'orange';
+            loginMessage.textContent = 'Logging in...';
+
+            // Simulate successful login after 1 second (no real database check)
+            setTimeout(() => {
+                if (loginEmail === 'test@user.com' && loginPassword === 'password') {
+                    loginMessage.style.color = 'green';
+                    loginMessage.textContent = `Welcome back, ${loginEmail}!`;
+                } else {
+                    loginMessage.style.color = 'red';
+                    loginMessage.textContent = 'Invalid credentials. Please try again.';
+                }
+            }, 1000);
+        });
+
+
+        // --- INITIALIZATION AND NAVIGATION ---
+
+        /**
+         * Handles navigation by showing the selected section and hiding others.
+         * @param {string} sectionId - The ID of the section to show.
+         */
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+            window.scrollTo(0, 0); // Scroll to top on navigation
+        }
+
+        // Run on page load
+        window.onload = function() {
+            // ASYNC/AWAIT: Load all products on initialization
+            loadAllProducts(); 
+
+            // CALLBACK: Fetch and update orders list
+            fetchOrders(updateOrdersList);
+        };
+
+    </script>
+</body>
+</html>
